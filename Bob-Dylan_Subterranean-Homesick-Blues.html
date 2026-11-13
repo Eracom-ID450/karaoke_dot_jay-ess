@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Subterranean Homesick Blues</title>
+	<style>
+		body { font-family: system-ui; margin: 0; background: #111; color: #eee; }
+		header { position: fixed; top: 0; left: 0; right: 0; padding: 1rem; display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; z-index: 1; font-size: .85rem; }
+		header h1 { font-size: 1rem; margin: 0 1rem 0 0; }
+		#time { font-variant-numeric: tabular-nums; opacity: .6; }
+
+		/* list mode */
+		.karaoke:not(.karaoke-oneline) { padding: 40vh 1rem; text-align: center; }
+		.karaoke:not(.karaoke-oneline) .karaoke-line { margin: .4em 0; font-size: 1.6rem; opacity: .25; transition: opacity .2s, transform .2s, color .2s; }
+		.karaoke:not(.karaoke-oneline) .karaoke-past { opacity: .12; }
+		.karaoke:not(.karaoke-oneline) .karaoke-current { opacity: 1; color: #ffd54a; transform: scale(1.08); }
+
+		/* one-line mode: black Monaco on white, YHCHI style */
+		body.oneline { background: #fff; color: #000; }
+	</style>
+</head>
+<body>
+	<header>
+		<h1 id="title">Loading…</h1>
+		<button id="play">Play</button>
+		<button id="stop">Stop</button>
+		<label><input type="checkbox" id="compress" checked> compress whitespace</label>
+		<label><input type="checkbox" id="oneline" checked> one line</label>
+		<label><input type="checkbox" id="autoplay" checked> autoplay</label>
+		<label><input type="checkbox" id="loop" checked> loop</label>
+		<span id="time"></span>
+	</header>
+
+	<main id="stage"></main>
+
+	<script src="karaoke.js"></script>
+	<script>
+		const $ = (id) => document.getElementById(id);
+		const LRC = 'Bob-Dylan_Subterranean-Homesick-Blues.lrc';
+		let lrcText = '';
+		let k;
+
+		function build() {
+			if (k) k.stop();
+			document.body.classList.toggle('oneline', $('oneline').checked);
+			k = new Karaoke($('stage'), {
+				compressWhitespace: $('compress').checked,
+				oneLine: $('oneline').checked,
+				autoplay: $('autoplay').checked,
+				loop: $('loop').checked,
+				onEnd: () => { $('play').textContent = 'Play'; },
+			});
+			k.loadText(lrcText);
+			$('title').textContent = `${k.meta.ar} — ${k.meta.ti}`;
+			$('play').textContent = k.playing ? 'Pause' : 'Play';
+		}
+
+		$('play').onclick = () => { k.toggle(); $('play').textContent = k.playing ? 'Pause' : 'Play'; };
+		$('stop').onclick = () => { k.stop(); $('play').textContent = 'Play'; scrollTo(0, 0); };
+		$('compress').onchange = build;
+		$('oneline').onchange = build;
+		$('autoplay').onchange = build;
+		$('loop').onchange = () => { k.options.loop = $('loop').checked; };
+
+		(function clock() {
+			if (k) $('time').textContent = `${k.currentTime.toFixed(1)}s / ${k.duration.toFixed(1)}s`;
+			requestAnimationFrame(clock);
+		})();
+
+		fetch(LRC)
+			.then((r) => r.text())
+			.then((text) => { lrcText = text; build(); })
+			.catch(() => {
+				$('title').textContent = 'Could not load the .lrc — serve this folder over HTTP (e.g. `python3 -m http.server`).';
+			});
+	</script>
+</body>
+</html>
