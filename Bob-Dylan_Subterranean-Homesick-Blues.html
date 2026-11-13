@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Subterranean Homesick Blues</title>
 	<style>
-		body { font-family: system-ui; margin: 0; background: #111; color: #eee; }
+		body { font-family: system-ui; margin: 0; background: #000; color: #eee; }
 		header { position: fixed; top: 0; left: 0; right: 0; padding: 1rem; display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; z-index: 1; font-size: .85rem; }
 		header h1 { font-size: 1rem; margin: 0 1rem 0 0; }
 		#time { font-variant-numeric: tabular-nums; opacity: .6; }
@@ -16,8 +16,13 @@
 		.karaoke:not(.karaoke-oneline) .karaoke-past { opacity: .12; }
 		.karaoke:not(.karaoke-oneline) .karaoke-current { opacity: 1; color: #ffd54a; transform: scale(1.08); }
 
-		/* one-line mode: black Monaco on white, YHCHI style */
-		body.oneline { background: #fff; color: #000; }
+		/* low-res fire, scaled up with hard pixels */
+		body::before {
+			content: ''; position: fixed; inset: 0; z-index: -1;
+			background: #000 url(fire.gif) center / cover no-repeat;
+			image-rendering: pixelated;
+		}
+		.karaoke-line { color: #fff; text-shadow: 0 0 .12em #000, 0 0 .3em #000; }
 	</style>
 </head>
 <body>
