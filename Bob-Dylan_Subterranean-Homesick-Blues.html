@@ -23,10 +23,15 @@
 <body>
 	<header>
 		<h1 id="title">Loading…</h1>
+		<select id="song">
+			<option value="Bob-Dylan_Subterranean-Homesick-Blues_words.lrc">word timing</option>
+			<option value="Bob-Dylan_Subterranean-Homesick-Blues.lrc">line timing</option>
+		</select>
 		<button id="play">Play</button>
 		<button id="stop">Stop</button>
 		<label><input type="checkbox" id="compress" checked> compress whitespace</label>
 		<label><input type="checkbox" id="oneline" checked> one line</label>
+		<label><input type="checkbox" id="oneword" checked> one word</label>
 		<label><input type="checkbox" id="autoplay" checked> autoplay</label>
 		<label><input type="checkbox" id="loop" checked> loop</label>
 		<span id="time"></span>
@@ -37,7 +42,6 @@
 	<script src="karaoke.js"></script>
 	<script>
 		const $ = (id) => document.getElementById(id);
-		const LRC = 'Bob-Dylan_Subterranean-Homesick-Blues.lrc';
 		let lrcText = '';
 		let k;
 
@@ -47,6 +51,7 @@
 			k = new Karaoke($('stage'), {
 				compressWhitespace: $('compress').checked,
 				oneLine: $('oneline').checked,
+				oneWord: $('oneword').checked,
 				autoplay: $('autoplay').checked,
 				loop: $('loop').checked,
 				onEnd: () => { $('play').textContent = 'Play'; },
@@ -60,6 +65,8 @@
 		$('stop').onclick = () => { k.stop(); $('play').textContent = 'Play'; scrollTo(0, 0); };
 		$('compress').onchange = build;
 		$('oneline').onchange = build;
+		$('oneword').onchange = build;
+		$('song').onchange = loadSong;
 		$('autoplay').onchange = build;
 		$('loop').onchange = () => { k.options.loop = $('loop').checked; };
 
@@ -68,12 +75,15 @@
 			requestAnimationFrame(clock);
 		})();
 
-		fetch(LRC)
-			.then((r) => r.text())
-			.then((text) => { lrcText = text; build(); })
-			.catch(() => {
-				$('title').textContent = 'Could not load the .lrc — serve this folder over HTTP (e.g. `python3 -m http.server`).';
-			});
+		function loadSong() {
+			fetch($('song').value)
+				.then((r) => r.text())
+				.then((text) => { lrcText = text; build(); })
+				.catch(() => {
+					$('title').textContent = 'Could not load the .lrc — serve this folder over HTTP (e.g. `python3 -m http.server`).';
+				});
+		}
+		loadSong();
 	</script>
 </body>
 </html>
